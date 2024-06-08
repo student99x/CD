@@ -1,0 +1,70 @@
+Lab 3: Write a program for syntax checking of subset of given language using LEX and 
+YACC.
+
+
+syntax.y
+
+
+%{
+#include <stdio.h>
+%}
+%token DET NOUN PRONOUN VERB Preposition ADJECTIVE
+%nonassoc NOUN
+%nonassoc Preposition
+%nonassoc CONJ
+%%
+S1:S1 S
+ |S
+ ;
+ 
+S:SS '.' {printf("Simple Sentence");}
+|CS'.' {printf("Compound Sentence");};
+CS:SS CONJ SS {printf("Compound Sentence");}
+ |CS CONJ SS;
+SS:NP VP {printf("SS\n");}| VP{printf("1\n");};
+NP:DET NOUN {printf("Two No.\n");}
+ | NOUN {printf("3\n");} 
+| PRONOUN {printf("5\n");}
+ | DET NOUN PP {printf("6\n");};
+VP:VERB NP {printf("7\n");}| VERB {printf("8\n");} |VP PP {printf("10\n");};
+PP:Preposition NP {printf("11\n");};
+%%
+main()
+{
+yyparse();
+}
+int yyerror(char* msg)
+{
+return 1;
+}
+
+
+Syntax.l
+
+
+%{
+#include"y.tab.h"
+%}
+NOUN "Tarkeshwari"|"Dog"|"Asha"|"Mayuri"|"Monali"|"Pratiksha"|"Car"
+VERB "Play"|"Run"|"Sing"|"Act"|"Answer"|"Approve"|"Arrange 
+Drink"|"Eat"|"Edit"|"Enter"|"Sneeze"|"Solve"|"Study"|"Teach"|"Write" 
+PREPOSITION "In"|"On"|"Below"|"Above"|"Beside" 
+ADJECTIVE "Good"|"Bad"|"Big"|"small"|"Tall"|"Short"|"ugly"|"Beautiful"|"Adorable"
+PRONOUN "He"|"She"|"It"|"They"|"Them"
+DET "a"|"an"|"the"
+CONJ ([aA][nN][dD])|([oO][rR])|([bB][uU][tT])
+%%
+{NOUN} {return NOUN;}
+{VERB} {return VERB;}
+{PREPOSITION} {return Preposition;}
+{ADJECTIVE} {return ADJECTIVE;}
+{PRONOUN} {return PRONOUN;}
+{DET} {return DET;}
+{CONJ} {return CONJ;}
+"." {return yytext[0];}
+.|\n {}
+%%
+int yywrap()
+{
+return 1;
+}
