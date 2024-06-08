@@ -1,27 +1,41 @@
-%{ 
- # include<stdio.h>
-int lc=0,tc=0,sc=0,wc=0,cc=0;
+%{
+#include<stdio.h>
+int lc=0, tc=0, sc=0, wc=0, cc=0, oc=0, spc=0, ac=0;
+int is_article(char *str);
 %}
 %%
-[^ \t\n]+ {cc+=yyleng; wc++;}
-[ ] {cc++;sc++;}
-[\t] {cc++; tc++;}
-\n {cc++; lc++;}
-%%
-main()
-{
-yyin = fopen("a1.txt","r");
-yyout=fopen("a2.txt","w");
-yylex();
-fclose(yyin);
-fclose(yyout);
+[^ \t\n]+ { 
+    cc += yyleng; 
+    wc++;
+    if (is_article(yytext)) ac++;
 }
-int yywrap()
-{
-fprintf(yyout,"no. of lines =%d\n",lc);
-fprintf(yyout,"no. of tabs=%d\n",tc);
-fprintf(yyout,"no. of characters = %d\n",cc);
-fprintf(yyout,"no. of spaces = %d\n",sc);
-fprintf(yyout,"no. of words=%d\n",wc);
-return 1;
+[ ] { cc++; sc++; }
+[\t] { cc++; tc++; }
+\n { cc++; lc++; }
+[!@#$%^&*()_+={}|\[\]:;"'<>,.?/~`-] { cc++; spc++; } // Special characters
+[+=*/%&|^<>!~?:-] { cc++; oc++; }  // Operators
+%%
+int is_article(char *str) {
+    return (!strcmp(str, "a") || !strcmp(str, "an") || !strcmp(str, "the"));
+}
+
+int main() {
+    yyin = fopen("a1.txt", "r");
+    yyout = fopen("a2.txt", "w");
+    yylex();
+    fclose(yyin);
+    fclose(yyout);
+    return 0;
+}
+
+int yywrap() {
+    fprintf(yyout, "no. of lines = %d\n", lc);
+    fprintf(yyout, "no. of tabs = %d\n", tc);
+    fprintf(yyout, "no. of characters = %d\n", cc);
+    fprintf(yyout, "no. of spaces = %d\n", sc);
+    fprintf(yyout, "no. of words = %d\n", wc);
+    fprintf(yyout, "no. of operators = %d\n", oc);
+    fprintf(yyout, "no. of special characters = %d\n", spc);
+    fprintf(yyout, "no. of articles = %d\n", ac);
+    return 1;
 }
